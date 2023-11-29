@@ -1,0 +1,2 @@
+manCode;
+    encode(huffmanTreeRoot, "", huff
