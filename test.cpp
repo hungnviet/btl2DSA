@@ -163,7 +163,7 @@ int getRes(string name)
     return binaryToDecimal(stoi(t));
 }
 
-/// Build GOJO restaurent
+/// mange name and result of each customer
 struct Customer
 {
     string name;
@@ -179,6 +179,7 @@ struct Customer
         result = 0;
     }
 };
+/// Build GOJO restaurent
 struct nodeInAreaOfGoJo
 {
     Customer cus;
@@ -252,6 +253,110 @@ struct areaOfGoJo
 };
 areaOfGoJo hashTableOfGoJo[MAXSIZE];
 
+/// BUILD SUKANA RESTAURENT
+struct nodeInHeapOfSukuna
+{
+    vector<Customer> customerInNodeOfSukuna;
+    int ID;
+    int numOfCusInNode;
+
+    nodeInHeapOfSukuna(int a)
+    {
+        ID = a;
+        numOfCusInNode = 0;
+    }
+};
+vector<nodeInHeapOfSukuna *> heap;
+void reHeapDown(int i)
+{
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    if (left < heap.size() && heap[left]->numOfCusInNode < heap[largest]->numOfCusInNode)
+    {
+        largest = left;
+    }
+    if (right < heap.size() && heap[right]->numOfCusInNode < heap[largest]->numOfCusInNode)
+    {
+        largest = right;
+    }
+    if (largest != i)
+    {
+        swap(heap[i], heap[largest]);
+        reHeapDown(largest);
+    }
+}
+bool checkNodeExist(int ID)
+{
+    for (int i = 0; i < heap.size(); i++)
+    {
+        if (heap[i]->ID == ID)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+void addNodeToHeap(int ID)
+{
+    nodeInHeapOfSukuna *tmp = new nodeInHeapOfSukuna(ID);
+    heap.push_back(tmp);
+    // reheap up
+    int i = heap.size() - 1;
+    while (i != 0 && heap[(i - 1) / 2]->numOfCusInNode > heap[i]->numOfCusInNode)
+    {
+        swap(heap[(i - 1) / 2], heap[i]);
+        i = (i - 1) / 2;
+    }
+}
+void addCustomer(string name, int result)
+{
+    int id = result % MAXSIZE + 1;
+    Customer tmpCus(name, result);
+    if (checkNodeExist(id))
+    {
+        for (int i = 0; i < heap.size(); i++)
+        {
+            if (heap[i]->ID == id)
+            {
+                heap[i]->customerInNodeOfSukuna.push_back(tmpCus);
+                heap[i]->numOfCusInNode++;
+                reHeapDown(i);
+                return;
+            }
+        }
+    }
+    else
+    {
+        addNodeToHeap(id);
+        for (int i = 0; i < heap.size(); i++)
+        {
+            if (heap[i]->ID == id)
+            {
+                heap[i]->customerInNodeOfSukuna.push_back(tmpCus);
+                heap[i]->numOfCusInNode++;
+                reHeapDown(i);
+                return;
+            }
+        }
+    }
+}
+
+/// LAPSE FUNCTION
+void LAPSE(string name)
+{
+    int result = getRes(name);
+    if (result % 2 == 0)
+    {
+        addCustomer(name, result);
+    }
+    else
+    {
+        int ID = result % MAXSIZE + 1;
+        hashTableOfGoJo[ID - 1].addCusToAreaOfRoJo(name, result);
+    }
+}
+
 /// LIMITLESS FUNCTION TO PRINT THE GOJO RESTAURENT
 void subLimitless(int num, areaOfGoJo arr[]);
 void printLimitless(nodeInAreaOfGoJo *root);
@@ -279,8 +384,38 @@ void printLimitless(nodeInAreaOfGoJo *root)
     cout << root->cus.result << endl;
     printLimitless(root->right);
 }
-
+/// CLEAVE FUNCTION TO PRINT THE SUKUNA RESTAURENT
+void CLEAVE(int num)
+{
+    subCleave(0, num);
+}
+void subCleave(int index, int num)
+{
+    if (index < heap.size())
+    {
+        printEachAreaOfSukuna(heap[index], num);
+        subCleave(2 * index + 1, num);
+        subCleave(2 * index + 2, num);
+    }
+}
+void printEachAreaOfSukuna(nodeInHeapOfSukuna *node, int num)
+{
+    if (num > node->numOfCusInNode)
+    {
+        num = node->numOfCusInNode;
+    }
+    int i = node->numOfCusInNode - 1;
+    while (num > 0)
+    {
+        cout << node->ID;
+        cout << "-";
+        cout << node->customerInNodeOfSukuna[i].result << endl;
+        num--;
+        i--;
+    }
+}
 int main()
 {
+
     return 0;
 }
