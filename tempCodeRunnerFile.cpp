@@ -1,2 +1,2 @@
-manCode;
-    encode(huffmanTreeRoot, "", huff
+[1].addCusToAreaOfRoJo("D", 1);
+    hashTableOfGoJo

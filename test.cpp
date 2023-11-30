@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 const int MAXSIZE = 5;
+/// build cay hulfman cho 1 thang
 struct HuffmanNode
 {
     char data;
@@ -41,19 +42,6 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
     }
     return pq.top();
 }
-void printHuffmanCodes(HuffmanNode *root, string code = "")
-{
-    if (root)
-    {
-        if (root->data != '\0')
-        {
-            cout << root->data << ": " << code << endl;
-        }
-        printHuffmanCodes(root->left, code + "0");
-        printHuffmanCodes(root->right, code + "1");
-    }
-}
-
 char maHoa(char c, int n)
 {
     char res;
@@ -121,7 +109,6 @@ int binaryToDecimal(int n)
 
     return dec_value;
 }
-// Main function
 int getRes(string name)
 {
     vector<pair<char, int>> freqencyTable = createFrequencyTable(name);
@@ -175,13 +162,125 @@ int getRes(string name)
     }
     return binaryToDecimal(stoi(t));
 }
-struct GojoHash
+
+/// Build GOJO restaurent
+struct Customer
 {
-    vector<int> areaInGoJoRes[MAXSIZE];
+    string name;
+    int result;
+    Customer(string a, int b)
+    {
+        name = a;
+        result = b;
+    }
+    Customer()
+    {
+        name = "";
+        result = 0;
+    }
 };
+struct nodeInAreaOfGoJo
+{
+    Customer cus;
+    nodeInAreaOfGoJo *left;
+    nodeInAreaOfGoJo *right;
+    nodeInAreaOfGoJo() : left(nullptr), right(nullptr)
+    {
+        cus = Customer();
+    }
+    nodeInAreaOfGoJo(string name, int res)
+    {
+        cus = Customer(name, res);
+        left = nullptr;
+        right = nullptr;
+    }
+};
+struct areaOfGoJo
+{
+    int idOfArea;
+    int numOfCusInArea;
+    nodeInAreaOfGoJo *root;
+    areaOfGoJo()
+    {
+        numOfCusInArea = 0;
+        root = nullptr;
+        idOfArea = 0;
+    }
+    void addCusToAreaOfRoJo(string name, int res)
+    {
+        nodeInAreaOfGoJo *tmp = new nodeInAreaOfGoJo(name, res);
+        if (!root)
+        {
+            root = tmp;
+            numOfCusInArea++;
+            return;
+        }
+        else
+        {
+            nodeInAreaOfGoJo *runner = root;
+            while (true)
+            {
+                if (res < runner->cus.result)
+                {
+                    if (runner->left == nullptr)
+                    {
+                        runner->left = tmp;
+                        numOfCusInArea++;
+                        return;
+                    }
+                    else
+                    {
+                        runner = runner->left;
+                    }
+                }
+                else if (res >= runner->cus.result)
+                {
+                    if (runner->right == nullptr)
+                    {
+                        runner->right = tmp;
+                        numOfCusInArea++;
+                        return;
+                    }
+                    else
+                    {
+                        runner = runner->right;
+                    }
+                }
+            }
+        }
+    }
+};
+areaOfGoJo hashTableOfGoJo[MAXSIZE];
+
+/// LIMITLESS FUNCTION TO PRINT THE GOJO RESTAURENT
+void subLimitless(int num, areaOfGoJo arr[]);
+void printLimitless(nodeInAreaOfGoJo *root);
+void LIMITLESS(int num);
+void LIMITLESS(int num)
+{
+    subLimitless(num, hashTableOfGoJo);
+}
+void subLimitless(int num, areaOfGoJo arr[])
+{
+    nodeInAreaOfGoJo *root = arr[num - 1].root;
+    if (!root)
+    {
+        return;
+    }
+    printLimitless(root);
+}
+void printLimitless(nodeInAreaOfGoJo *root)
+{
+    if (!root)
+    {
+        return;
+    }
+    printLimitless(root->left);
+    cout << root->cus.result << endl;
+    printLimitless(root->right);
+}
+
 int main()
 {
-    string name = "aaabbcccDD";
-    cout << getRes(name);
     return 0;
 }

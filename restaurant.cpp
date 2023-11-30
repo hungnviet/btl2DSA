@@ -162,8 +162,6 @@ int getRes(string name)
 	return binaryToDecimal(stoi(t));
 }
 
-/// KOKUSEN restaurent
-
 void simulate(string filename)
 {
 	cout << "Good Luck";
