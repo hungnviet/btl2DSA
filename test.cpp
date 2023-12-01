@@ -74,8 +74,7 @@ vector<pair<char, int>> createFrequencyTable(string inputString)
          });
     return frequencyTable;
 }
-void encode(HuffmanNode *root, string str,
-            unordered_map<char, string> &huffmanCode)
+void encode(HuffmanNode *root, string str, unordered_map<char, string> &huffmanCode)
 {
     if (root == nullptr)
         return;
@@ -201,6 +200,7 @@ struct areaOfGoJo
     int idOfArea;
     int numOfCusInArea;
     nodeInAreaOfGoJo *root;
+    vector<Customer> orderInputOfCustomer;
     areaOfGoJo()
     {
         numOfCusInArea = 0;
@@ -249,6 +249,7 @@ struct areaOfGoJo
                 }
             }
         }
+        orderInputOfCustomer.push_back(tmp->cus);
     }
 };
 areaOfGoJo hashTableOfGoJo[MAXSIZE];
@@ -385,6 +386,8 @@ void printLimitless(nodeInAreaOfGoJo *root)
     printLimitless(root->right);
 }
 /// CLEAVE FUNCTION TO PRINT THE SUKUNA RESTAURENT
+void subCleave(int start, int end);
+void printEachAreaOfSukuna(nodeInHeapOfSukuna *node, int num);
 void CLEAVE(int num)
 {
     subCleave(0, num);
@@ -412,6 +415,152 @@ void printEachAreaOfSukuna(nodeInHeapOfSukuna *node, int num)
         cout << node->customerInNodeOfSukuna[i].result << endl;
         num--;
         i--;
+    }
+}
+
+/// KOKUSEN FUNCTION TO KICK THE GUESS IN GOJO restaurant
+void subConvertToPost(vector<int> &res, nodeInAreaOfGoJo *root);
+vector<int> arrayAfterConvertToPost(nodeInAreaOfGoJo *root)
+{
+    vector<int> res;
+    subConvertToPost(res, root);
+    return res;
+}
+void subConvertToPost(vector<int> &res, nodeInAreaOfGoJo *root)
+{
+    if (root)
+    {
+        subConvertToPost(res, root->left);
+        subConvertToPost(res, root->right);
+        res.push_back(root->cus.result);
+    }
+}
+void factorial(int fact[], int n)
+{
+    fact[0] = 1;
+    for (int i = 1; i <= n; i++)
+    {
+        fact[i] = fact[i - 1] * i;
+    }
+}
+int nCr(int n, int r)
+{
+    int fact[n + 1];
+    factorial(fact, n);
+    return fact[n] / (fact[r] * fact[n - r]);
+}
+int counthoanvi(vector<int> &arr)
+{
+    int n = arr.size();
+    if (n <= 2)
+    {
+        return 1;
+    }
+    vector<int> left;
+    vector<int> right;
+    int root = arr[0];
+    for (int i = 0; i < n; i++)
+    {
+        if (arr[i] < root)
+        {
+            left.push_back(arr[i]);
+        }
+        else if (arr[i] > root)
+        {
+            right.push_back(arr[i]);
+        }
+    }
+    int nleft = left.size();
+    int nright = right.size();
+    int countleft = counthoanvi(left);
+    int countright = counthoanvi(right);
+    return nCr(n - 1, nleft) * countleft * countright;
+}
+void Kokusen()
+{
+    for (int i = 0; i < MAXSIZE; i++)
+    {
+        vector<int> arr = arrayAfterConvertToPost(hashTableOfGoJo[i].root);
+        int rootforhvi = arr.back();
+        arr.pop_back();
+        arr.push_back(arr.front());
+        arr.insert(arr.begin(), rootforhvi);
+        int fact[arr.size()];
+        int Y = counthoanvi(arr) - 1;
+        removeInAreaOfGoJo(i + 1, Y);
+    }
+}
+nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
+{
+    if (!root)
+    {
+        return root;
+    }
+    if (root->cus.result > tmp.result)
+    {
+        root->left = delNode(root->left, tmp);
+        return root;
+    }
+    else if (root->cus.result < tmp.result)
+    {
+        root->right = delNode(root->right, tmp);
+        return root;
+    }
+    if (root->left == NULL)
+    {
+        nodeInAreaOfGoJo *temp = root->right;
+        delete root;
+        return temp;
+    }
+    else if (root->right == NULL)
+    {
+        nodeInAreaOfGoJo *temp = root->left;
+        delete root;
+        return temp;
+    }
+    else
+    {
+
+        nodeInAreaOfGoJo *succParent = root;
+
+        // Find successor
+        nodeInAreaOfGoJo *succ = root->right;
+        while (succ->left != NULL)
+        {
+            succParent = succ;
+            succ = succ->left;
+        }
+
+        if (succParent != root)
+            succParent->left = succ->right;
+        else
+            succParent->right = succ->right;
+
+        // Copy Successor Data to root
+        root->cus = succ->cus;
+
+        // Delete Successor and return root
+        delete succ;
+        return root;
+    }
+}
+void removeInAreaOfGoJo(int ID, int Y)
+{
+    int n = hashTableOfGoJo[ID - 1].numOfCusInArea;
+    if (n <= Y)
+    {
+        hashTableOfGoJo[ID - 1].root = nullptr;
+        hashTableOfGoJo[ID - 1].numOfCusInArea = 0;
+        hashTableOfGoJo[ID - 1].orderInputOfCustomer.clear();
+    }
+    else
+    {
+        for (int i = 0; i < Y; i++)
+        {
+            hashTableOfGoJo[ID - 1].root = delNode(hashTableOfGoJo[ID - 1].root, hashTableOfGoJo[ID - 1].orderInputOfCustomer[0]);
+            hashTableOfGoJo[ID - 1].numOfCusInArea--;
+            hashTableOfGoJo[ID - 1].orderInputOfCustomer.erase(0);
+        }
     }
 }
 int main()
