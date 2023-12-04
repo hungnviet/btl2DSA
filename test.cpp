@@ -12,15 +12,68 @@ struct HuffmanNode
     // Constructor
     HuffmanNode(char d, int freq) : data(d), frequency(freq), left(nullptr), right(nullptr) {}
 };
+HuffmanNode *rotateRight(HuffmanNode *root)
+{
+    HuffmanNode *p = root->left;
+    HuffmanNode *tmp = p->right;
+    root->left = tmp;
+    p->right = root;
+    return p;
+}
+HuffmanNode *rotateLeft(HuffmanNode *root)
+{
+    HuffmanNode *p = root->right;
+    HuffmanNode *tmp = p->left;
+    root->right = tmp;
+    p->left = root;
+    return p;
+}
+int getHeight(HuffmanNode *root)
+{
+    if (!root)
+    {
+        return 0;
+    }
+    return 1 + max(getHeight(root->left), getHeight(root->right));
+}
 struct CompareNodes
 {
     bool operator()(HuffmanNode *lhs, HuffmanNode *rhs)
     {
+        // Assuming a lower frequency means higher priority
         return lhs->frequency >= rhs->frequency;
     }
 };
+HuffmanNode *checkAndRotate(HuffmanNode *root)
+{
+    if (!root)
+    {
+        return nullptr;
+    }
+    int balance = getHeight(root->left) - getHeight(root->right);
+    if (balance > 1 && getHeight(root->left->left) - getHeight(root->left->right) >= 0)
+    {
+        return rotateRight(root);
+    }
+    if (balance > 1 && getHeight(root->left->left) < getHeight(root->left->right))
+    {
+        root->left = rotateLeft(root->left);
+        return rotateRight(root);
+    }
+    if (balance < -1 && getHeight(root->right->right) >= getHeight(root->right->left))
+    {
+        return rotateLeft(root);
+    }
+    if (balance < -1 && getHeight(root->right->left) > getHeight(root->right->right))
+    {
+        root->right = rotateRight(root->right);
+        return rotateLeft(root);
+    }
+    return root;
+}
 HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 {
+
     priority_queue<HuffmanNode *, vector<HuffmanNode *>, CompareNodes> pq;
     for (const auto &entry : frequencyTable)
     {
@@ -31,15 +84,23 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
     // Build the Huffman tree
     while (pq.size() > 1)
     {
+
         HuffmanNode *leftChild = pq.top();
+
         pq.pop();
         HuffmanNode *rightChild = pq.top();
+
         pq.pop();
         HuffmanNode *internalNode = new HuffmanNode('\0', leftChild->frequency + rightChild->frequency);
         internalNode->left = leftChild;
         internalNode->right = rightChild;
+        internalNode = checkAndRotate(internalNode);
+        internalNode->left = checkAndRotate(internalNode->left);
+        internalNode->right = checkAndRotate(internalNode->right);
+
         pq.push(internalNode);
     }
+
     return pq.top();
 }
 char maHoa(char c, int n)
@@ -57,7 +118,25 @@ char maHoa(char c, int n)
 }
 bool compare(pair<char, int> &a, pair<char, int> &b)
 {
-    return (a.second == b.second) ? a.first < b.first : a.second < b.second;
+    if (a.second < b.second)
+    {
+        return true;
+    }
+    else if (a.second > b.second)
+    {
+        return false;
+    }
+    else if (a.second == b.second)
+    {
+        if ((islower(a.first) && islower(b.first)) || (isupper(a.first) && isupper(b.first)))
+        {
+            return a.first < b.first;
+        }
+        else
+        {
+            return islower(a.first);
+        }
+    }
 }
 vector<pair<char, int>> createFrequencyTable(string inputString)
 {
@@ -120,6 +199,7 @@ int getRes(string name)
         pair<int, char> tmp = {c, i.second};
         res.push_back(tmp);
     }
+
     map<char, int> tmp;
     for (auto i : res)
     {
@@ -344,8 +424,26 @@ void addCustomer(string name, int result)
 }
 
 /// LAPSE FUNCTION
+bool checkName(string name)
+{
+    set<char> s;
+    for (int i = 0; i < name.length(); i++)
+    {
+        s.insert(name[i]);
+    }
+    if (s.size() < 3)
+    {
+        return false;
+    }
+    return true;
+}
 void LAPSE(string name)
 {
+    if (!checkName(name))
+    {
+        cout << "dung khong lam nua";
+        return;
+    }
     int result = getRes(name);
     if (result % 2 == 0)
     {
@@ -435,6 +533,7 @@ void subConvertToPost(vector<int> &res, nodeInAreaOfGoJo *root)
         res.push_back(root->cus.result);
     }
 }
+
 void factorial(int fact[], int n)
 {
     fact[0] = 1;
@@ -476,20 +575,24 @@ int counthoanvi(vector<int> &arr)
     int countright = counthoanvi(right);
     return nCr(n - 1, nleft) * countleft * countright;
 }
+
+void removeInAreaOfGoJo(int ID, int Y);
 void Kokusen()
 {
     for (int i = 0; i < MAXSIZE; i++)
     {
+
         vector<int> arr = arrayAfterConvertToPost(hashTableOfGoJo[i].root);
         int rootforhvi = arr.back();
         arr.pop_back();
         arr.push_back(arr.front());
         arr.insert(arr.begin(), rootforhvi);
         int fact[arr.size()];
-        int Y = counthoanvi(arr) - 1;
+        int Y = counthoanvi(arr);
         removeInAreaOfGoJo(i + 1, Y);
     }
 }
+
 nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
 {
     if (!root)
@@ -544,6 +647,7 @@ nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
         return root;
     }
 }
+
 void removeInAreaOfGoJo(int ID, int Y)
 {
     int n = hashTableOfGoJo[ID - 1].numOfCusInArea;
@@ -559,12 +663,24 @@ void removeInAreaOfGoJo(int ID, int Y)
         {
             hashTableOfGoJo[ID - 1].root = delNode(hashTableOfGoJo[ID - 1].root, hashTableOfGoJo[ID - 1].orderInputOfCustomer[0]);
             hashTableOfGoJo[ID - 1].numOfCusInArea--;
-            hashTableOfGoJo[ID - 1].orderInputOfCustomer.erase(0);
+            hashTableOfGoJo[ID - 1].orderInputOfCustomer.erase(hashTableOfGoJo[ID - 1].orderInputOfCustomer.begin() + 0);
         }
     }
 }
+
 int main()
 {
-
+    string s = "abbcccdddDDDDEEEEE";
+    vector<pair<char, int>> table = {
+        {'a', 1},
+        {'b', 2},
+        {'c', 3},
+        {'d', 4},
+        {'D', 4},
+        {'E', 5}};
+    HuffmanNode *root = buildHuffmanTree(table);
+    unordered_map<char, string> huffmanCode;
+    encode(root, "", huffmanCode);
+    cout << huffmanCode['d'];
     return 0;
 }
