@@ -348,6 +348,7 @@ struct nodeInHeapOfSukuna
     }
 };
 vector<nodeInHeapOfSukuna *> heap;
+vector<int> orderUsedOfArea;
 void reHeapDown(int i)
 {
     int largest = i;
@@ -369,6 +370,10 @@ void reHeapDown(int i)
 }
 bool checkNodeExist(int ID)
 {
+    if (heap.size() == 0)
+    {
+        return false;
+    }
     for (int i = 0; i < heap.size(); i++)
     {
         if (heap[i]->ID == ID)
@@ -394,12 +399,27 @@ void addCustomer(string name, int result)
 {
     int id = result % MAXSIZE + 1;
     Customer tmpCus(name, result);
+    // update order used
+    auto it = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), id);
+    if (it != orderUsedOfArea.end())
+    {
+        int index = distance(orderUsedOfArea.begin(), it);
+        orderUsedOfArea.erase(orderUsedOfArea.begin() + index);
+        orderUsedOfArea.insert(orderUsedOfArea.begin(), id);
+    }
+    else
+    {
+        orderUsedOfArea.insert(orderUsedOfArea.begin(), id);
+    }
+
+    /// add customer or node in restaurent
     if (checkNodeExist(id))
     {
         for (int i = 0; i < heap.size(); i++)
         {
             if (heap[i]->ID == id)
             {
+
                 heap[i]->customerInNodeOfSukuna.push_back(tmpCus);
                 heap[i]->numOfCusInNode++;
                 reHeapDown(i);
@@ -533,7 +553,6 @@ void subConvertToPost(vector<int> &res, nodeInAreaOfGoJo *root)
         res.push_back(root->cus.result);
     }
 }
-
 void factorial(int fact[], int n)
 {
     fact[0] = 1;
@@ -575,7 +594,6 @@ int counthoanvi(vector<int> &arr)
     int countright = counthoanvi(right);
     return nCr(n - 1, nleft) * countleft * countright;
 }
-
 void removeInAreaOfGoJo(int ID, int Y);
 void Kokusen()
 {
@@ -592,7 +610,6 @@ void Kokusen()
         removeInAreaOfGoJo(i + 1, Y);
     }
 }
-
 nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
 {
     if (!root)
@@ -647,7 +664,6 @@ nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
         return root;
     }
 }
-
 void removeInAreaOfGoJo(int ID, int Y)
 {
     int n = hashTableOfGoJo[ID - 1].numOfCusInArea;
@@ -668,19 +684,114 @@ void removeInAreaOfGoJo(int ID, int Y)
     }
 }
 
+/// KEITEIKEN FUNCTION TO REMOVE THE CUSTOMER IN SUKUNA RESTAURENT
+struct areaAndNum
+{
+    int id;
+    int num;
+    areaAndNum(int a, int b)
+    {
+        id = a;
+        num = b;
+    }
+};
+bool compareNumOfCustomer(areaAndNum a, areaAndNum b)
+{
+    if (a.num < b.num)
+    {
+        return true;
+    }
+    else if (a.num > b.num)
+    {
+        return false;
+    }
+    else
+    {
+        auto ita = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), a.id);
+        auto itb = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), b.id);
+        int indexa = distance(orderUsedOfArea.begin(), ita);
+        int indexb = distance(orderUsedOfArea.begin(), itb);
+        return indexa >= indexb;
+    }
+}
+void KEITEIKEN(int num)
+{
+    vector<areaAndNum> OrderOfNumCustomer;
+    for (int i = 0; i < heap.size(); i++)
+    {
+        OrderOfNumCustomer[i] = areaAndNum(heap[i]->ID, heap[i]->numOfCusInNode);
+    }
+    sort(OrderOfNumCustomer.begin(), OrderOfNumCustomer.end(), compareNumOfCustomer);
+    if (num >= heap.size())
+    {
+        for (int i = 0; i < heap.size(); i++)
+        {
+            removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
+        }
+        while (heap.size() > 0)
+        {
+            nodeInHeapOfSukuna *tmp = heap[heap.size() - 1];
+            heap.pop_back();
+            delete tmp;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < num; i++)
+        {
+            removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
+        }
+    }
+}
+void removeInAreaOfSukuna(int ID, int num)
+{
+    for (int i = 0; i < heap.size(); i++)
+    {
+        if (heap[i]->ID = ID)
+        {
+            if (heap[i]->numOfCusInNode <= num)
+            {
+                /// ddooir no voi thang node cuoi truong heap
+                nodeInHeapOfSukuna *tmp = heap[i];
+                nodeInHeapOfSukuna *del = heap[heap.size() - 1];
+                heap[i] == heap[heap.size() - 1];
+                heap.pop_back();
+                reHeapDown(i);
+                // in ra
+                for (int j = 0; j < tmp->numOfCusInNode; j++)
+                {
+                    cout << tmp->customerInNodeOfSukuna[j].result;
+                    cout << "-";
+                    cout << tmp->ID << endl;
+                }
+                delete del;
+                delete tmp;
+            }
+            else
+            {
+                for (int j = 0; j < num; j++)
+                {
+                    cout << heap[i]->customerInNodeOfSukuna[0].name;
+                    cout << "-";
+                    cout << heap[i]->ID;
+                    heap[i]->numOfCusInNode--;
+                    heap[i]->customerInNodeOfSukuna.erase(heap[i]->customerInNodeOfSukuna.begin(), heap[i]->customerInNodeOfSukuna.begin() + 1);
+                }
+                /// reheap up
+                int j = i;
+                while (j != 0 && heap[(j - 1) / 2]->numOfCusInNode > heap[j]->numOfCusInNode)
+                {
+                    swap(heap[(j - 1) / 2], heap[j]);
+                    j = (j - 1) / 2;
+                }
+            }
+        }
+    }
+}
 int main()
 {
     string s = "abbcccdddDDDDEEEEE";
-    vector<pair<char, int>> table = {
-        {'a', 1},
-        {'b', 2},
-        {'c', 3},
-        {'d', 4},
-        {'D', 4},
-        {'E', 5}};
-    HuffmanNode *root = buildHuffmanTree(table);
-    unordered_map<char, string> huffmanCode;
-    encode(root, "", huffmanCode);
-    cout << huffmanCode['d'];
+
+    cout << getRes(s);
     return 0;
 }

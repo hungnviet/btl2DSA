@@ -5,6 +5,14 @@
         "deque": "cpp",
         "list": "cpp",
         "vector": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "iostream": "cpp",
+        "forward_list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp",
+        "valarray": "cpp"
     }
 }
