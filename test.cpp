@@ -2,6 +2,7 @@
 using namespace std;
 const int MAXSIZE = 5;
 /// build cay hulfman cho 1 thang
+
 struct HuffmanNode
 {
     char data;
@@ -18,6 +19,26 @@ HuffmanNode *rotateRight(HuffmanNode *root)
     HuffmanNode *tmp = p->right;
     root->left = tmp;
     p->right = root;
+    HuffmanNode *tmpp = p;
+    tmpp->frequency = 0;
+    if (tmpp->left)
+    {
+        tmpp->frequency += tmpp->left->frequency;
+    }
+    if (tmpp->right)
+    {
+        tmpp->frequency += tmpp->right->frequency;
+    }
+    HuffmanNode *temp = tmp;
+    temp->frequency = 0;
+    if (temp->left)
+    {
+        temp->frequency += temp->left->frequency;
+    }
+    if (temp->right)
+    {
+        temp->frequency += temp->right->frequency;
+    }
     return p;
 }
 HuffmanNode *rotateLeft(HuffmanNode *root)
@@ -26,6 +47,26 @@ HuffmanNode *rotateLeft(HuffmanNode *root)
     HuffmanNode *tmp = p->left;
     root->right = tmp;
     p->left = root;
+    HuffmanNode *tmpp = p;
+    tmpp->frequency = 0;
+    if (tmpp->left)
+    {
+        tmpp->frequency += tmpp->left->frequency;
+    }
+    if (tmpp->right)
+    {
+        tmpp->frequency += tmpp->right->frequency;
+    }
+    HuffmanNode *temp = tmp;
+    temp->frequency = 0;
+    if (temp->left)
+    {
+        temp->frequency += temp->left->frequency;
+    }
+    if (temp->right)
+    {
+        temp->frequency += temp->right->frequency;
+    }
     return p;
 }
 int getHeight(HuffmanNode *root)
@@ -41,7 +82,25 @@ struct CompareNodes
     bool operator()(HuffmanNode *lhs, HuffmanNode *rhs)
     {
         // Assuming a lower frequency means higher priority
-        return lhs->frequency >= rhs->frequency;
+        if (lhs->frequency > rhs->frequency)
+        {
+            return true;
+        }
+        else if (lhs->frequency < rhs->frequency)
+        {
+            return false;
+        }
+        else
+        {
+            if ((islower(lhs->data) && islower(rhs->data)) || (isupper(lhs->data) && isupper(rhs->data)))
+            {
+                return lhs->data < rhs->frequency;
+            }
+            else
+            {
+                return isupper(lhs->data);
+            }
+        }
     }
 };
 HuffmanNode *checkAndRotate(HuffmanNode *root)
@@ -86,10 +145,8 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
     {
 
         HuffmanNode *leftChild = pq.top();
-
         pq.pop();
         HuffmanNode *rightChild = pq.top();
-
         pq.pop();
         HuffmanNode *internalNode = new HuffmanNode('\0', leftChild->frequency + rightChild->frequency);
         internalNode->left = leftChild;
@@ -97,10 +154,8 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
         internalNode = checkAndRotate(internalNode);
         internalNode->left = checkAndRotate(internalNode->left);
         internalNode->right = checkAndRotate(internalNode->right);
-
         pq.push(internalNode);
     }
-
     return pq.top();
 }
 char maHoa(char c, int n)
@@ -187,6 +242,17 @@ int binaryToDecimal(int n)
 
     return dec_value;
 }
+HuffmanNode *rootOfLatestCustomer;
+void delHulfmanTree(HuffmanNode *root)
+{
+    if (!root)
+    {
+        return;
+    }
+    delHulfmanTree(root->left);
+    delHulfmanTree(root->right);
+    delete root;
+}
 int getRes(string name)
 {
     vector<pair<char, int>> freqencyTable = createFrequencyTable(name);
@@ -214,7 +280,11 @@ int getRes(string name)
         char c = maHoa(i, freMap[i]);
         caesarName.push_back(c);
     }
+
     HuffmanNode *huffmanTreeRoot = buildHuffmanTree(Res);
+    HuffmanNode *a = rootOfLatestCustomer;
+    rootOfLatestCustomer = huffmanTreeRoot;
+    delHulfmanTree(a);
 
     unordered_map<char, string> huffmanCode;
     encode(huffmanTreeRoot, "", huffmanCode);
@@ -461,10 +531,11 @@ void LAPSE(string name)
 {
     if (!checkName(name))
     {
-        cout << "dung khong lam nua";
         return;
     }
+
     int result = getRes(name);
+    Customer tmpCus(name, result);
     if (result % 2 == 0)
     {
         addCustomer(name, result);
@@ -685,6 +756,7 @@ void removeInAreaOfGoJo(int ID, int Y)
 }
 
 /// KEITEIKEN FUNCTION TO REMOVE THE CUSTOMER IN SUKUNA RESTAURENT
+void removeInAreaOfSukuna(int ID, int num);
 struct areaAndNum
 {
     int id;
@@ -788,10 +860,33 @@ void removeInAreaOfSukuna(int ID, int num)
         }
     }
 }
+
+/// HAND function
+void HAND();
+void subHand(HuffmanNode *root);
+void HAND()
+{
+    subHand(rootOfLatestCustomer);
+}
+void subHand(HuffmanNode *root)
+{
+    if (!root)
+    {
+        return;
+    }
+    subHand(root->left);
+    if (root->data == '\0')
+    {
+        cout << root->frequency << endl;
+    }
+    else
+        cout << root->data << endl;
+    subHand(root->right);
+}
 int main()
 {
     string s = "abbcccdddDDDDEEEEE";
-
-    cout << getRes(s);
+    LAPSE(s);
+    HAND();
     return 0;
 }
