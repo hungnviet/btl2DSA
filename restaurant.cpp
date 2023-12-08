@@ -87,11 +87,7 @@ struct CompareNodes
 		{
 			return lhs->frequency > rhs->frequency;
 		}
-		else if (lhs->frequency == rhs->frequency && lhs->data == rhs->data)
-		{
-			return lhs->order > rhs->order;
-		}
-		else
+		else if (lhs->data != '\0' && rhs->data != '\0' && lhs->frequency == rhs->frequency)
 		{
 			if (islower(lhs->data) && isupper(rhs->data))
 			{
@@ -105,6 +101,10 @@ struct CompareNodes
 			{
 				return lhs->data > rhs->data;
 			}
+		}
+		else
+		{
+			return lhs->order > rhs->order;
 		}
 	}
 };
@@ -145,6 +145,7 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		pq.push(node);
 	}
 	// Build the Huffman tree
+	count++;
 	while (pq.size() > 1)
 	{
 
@@ -286,7 +287,6 @@ int getRes(string name)
 		char c = maHoa(i, freMap[i]);
 		caesarName.push_back(c);
 	}
-
 	HuffmanNode *huffmanTreeRoot = buildHuffmanTree(Res);
 	HuffmanNode *a = rootOfLatestCustomer;
 	rootOfLatestCustomer = huffmanTreeRoot;
@@ -804,11 +804,10 @@ void KEITEIKEN(int num)
 	sort(OrderOfNumCustomer.begin(), OrderOfNumCustomer.end(), compareNumOfCustomer);
 	if (num >= heap.size())
 	{
-		cout << heap.size() << endl;
+
 		for (int i = 0; i < heap.size(); i++)
 		{
-			// removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
-			cout << OrderOfNumCustomer[i].id << endl;
+			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
 		}
 		while (heap.size() > 0)
 		{
