@@ -455,7 +455,7 @@ bool checkNodeExist(int ID)
 void addNodeToHeap(int ID)
 {
 
-	nodeInHeapOfSukuna *tmp = new nodeInHeapOfSukuna(ID, orderOfHeapNode++);
+	nodeInHeapOfSukuna *tmp = new nodeInHeapOfSukuna(ID, orderOfHeapNode + 1);
 	heap.push_back(tmp);
 	// reheap up
 	int i = heap.size() - 1;
@@ -490,11 +490,11 @@ void addCustomer(string name, int result)
 		{
 			if (heap[i]->ID == id)
 			{
-
+				cout << id << endl;
 				heap[i]->customerInNodeOfSukuna.push_back(tmpCus);
 				heap[i]->numOfCusInNode++;
 				reHeapDown(i);
-				return;
+				break;
 			}
 		}
 	}
@@ -508,7 +508,7 @@ void addCustomer(string name, int result)
 				heap[i]->customerInNodeOfSukuna.push_back(tmpCus);
 				heap[i]->numOfCusInNode++;
 				reHeapDown(i);
-				return;
+				break;
 			}
 		}
 	}
@@ -798,13 +798,12 @@ void KEITEIKEN(int num)
 	vector<areaAndNum> OrderOfNumCustomer;
 	for (int i = 0; i < heap.size(); i++)
 	{
-
 		OrderOfNumCustomer.push_back(areaAndNum(heap[i]->ID, heap[i]->numOfCusInNode));
 	}
 	sort(OrderOfNumCustomer.begin(), OrderOfNumCustomer.end(), compareNumOfCustomer);
+
 	if (num >= heap.size())
 	{
-
 		for (int i = 0; i < heap.size(); i++)
 		{
 			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
@@ -818,9 +817,11 @@ void KEITEIKEN(int num)
 	}
 	else
 	{
+		cout << "day ne" << endl;
 		for (int i = 0; i < num; i++)
 		{
-			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
+
+			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, num);
 		}
 	}
 }
@@ -828,7 +829,7 @@ void removeInAreaOfSukuna(int ID, int num)
 {
 	for (int i = 0; i < heap.size(); i++)
 	{
-		if (heap[i]->ID = ID)
+		if (heap[i]->ID == ID)
 		{
 			if (heap[i]->numOfCusInNode <= num)
 			{
