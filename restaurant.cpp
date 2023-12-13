@@ -20,26 +20,6 @@ HuffmanNode *rotateRight(HuffmanNode *root)
 	HuffmanNode *tmp = p->right;
 	root->left = tmp;
 	p->right = root;
-	HuffmanNode *tmpp = root;
-	tmpp->frequency = 0;
-	if (tmpp->left)
-	{
-		tmpp->frequency += tmpp->left->frequency;
-	}
-	if (tmpp->right)
-	{
-		tmpp->frequency += tmpp->right->frequency;
-	}
-	HuffmanNode *temp = p;
-	temp->frequency = 0;
-	if (temp->left)
-	{
-		temp->frequency += temp->left->frequency;
-	}
-	if (temp->right)
-	{
-		temp->frequency += temp->right->frequency;
-	}
 	return p;
 }
 HuffmanNode *rotateLeft(HuffmanNode *root)
@@ -48,26 +28,6 @@ HuffmanNode *rotateLeft(HuffmanNode *root)
 	HuffmanNode *tmp = p->left;
 	root->right = tmp;
 	p->left = root;
-	HuffmanNode *tmpp = root;
-	tmpp->frequency = 0;
-	if (tmpp->left)
-	{
-		tmpp->frequency += tmpp->left->frequency;
-	}
-	if (tmpp->right)
-	{
-		tmpp->frequency += tmpp->right->frequency;
-	}
-	HuffmanNode *temp = p;
-	temp->frequency = 0;
-	if (temp->left)
-	{
-		temp->frequency += temp->left->frequency;
-	}
-	if (temp->right)
-	{
-		temp->frequency += temp->right->frequency;
-	}
 	return p;
 }
 int getHeight(HuffmanNode *root)
@@ -144,7 +104,6 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		HuffmanNode *node = new HuffmanNode(entry.first, entry.second, count);
 		pq.push(node);
 	}
-	// Build the Huffman tree
 	count++;
 	while (pq.size() > 1)
 	{
@@ -159,6 +118,10 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		internalNode = checkAndRotate(internalNode);
 		internalNode->left = checkAndRotate(internalNode->left);
 		internalNode->right = checkAndRotate(internalNode->right);
+		if (internalNode->frequency == 2 && internalNode->left && internalNode->right)
+		{
+			cout << internalNode->left->data << " " << internalNode->right->data << endl;
+		}
 		pq.push(internalNode);
 		count++;
 	}
@@ -344,7 +307,6 @@ struct nodeInAreaOfGoJo
 };
 struct areaOfGoJo
 {
-	int idOfArea;
 	int numOfCusInArea;
 	nodeInAreaOfGoJo *root;
 	vector<Customer> orderInputOfCustomer;
@@ -352,7 +314,6 @@ struct areaOfGoJo
 	{
 		numOfCusInArea = 0;
 		root = nullptr;
-		idOfArea = 0;
 	}
 	void addCusToAreaOfRoJo(string name, int res)
 	{
@@ -362,6 +323,7 @@ struct areaOfGoJo
 		{
 			root = tmp;
 			numOfCusInArea++;
+			orderInputOfCustomer.push_back(Customer(name, res));
 			return;
 		}
 		else
@@ -375,7 +337,7 @@ struct areaOfGoJo
 					{
 						runner->left = tmp;
 						numOfCusInArea++;
-						return;
+						break;
 					}
 					else
 					{
@@ -388,7 +350,7 @@ struct areaOfGoJo
 					{
 						runner->right = tmp;
 						numOfCusInArea++;
-						return;
+						break;
 					}
 					else
 					{
@@ -677,15 +639,17 @@ void Kokusen()
 {
 	for (int i = 0; i < MAXSIZE; i++)
 	{
-
-		vector<int> arr = arrayAfterConvertToPost(hashTableOfGoJo[i].root);
-		int rootforhvi = arr.back();
-		arr.pop_back();
-		arr.push_back(arr.front());
-		arr.insert(arr.begin(), rootforhvi);
-		int fact[arr.size()];
-		int Y = counthoanvi(arr);
-		removeInAreaOfGoJo(i + 1, Y);
+		if (hashTableOfGoJo[i].root)
+		{
+			vector<int> arr = arrayAfterConvertToPost(hashTableOfGoJo[i].root);
+			int rootforhvi = arr.back();
+			arr.pop_back();
+			arr.push_back(arr.front());
+			arr.insert(arr.begin(), rootforhvi);
+			int fact[arr.size()];
+			int Y = counthoanvi(arr);
+			removeInAreaOfGoJo(i + 1, Y);
+		}
 	}
 }
 nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
@@ -747,9 +711,11 @@ void removeInAreaOfGoJo(int ID, int Y)
 	int n = hashTableOfGoJo[ID - 1].numOfCusInArea;
 	if (n <= Y)
 	{
+		nodeInAreaOfGoJo *tmp = hashTableOfGoJo[ID - 1].root;
 		hashTableOfGoJo[ID - 1].root = nullptr;
 		hashTableOfGoJo[ID - 1].numOfCusInArea = 0;
 		hashTableOfGoJo[ID - 1].orderInputOfCustomer.clear();
+		delete tmp;
 	}
 	else
 	{
@@ -817,10 +783,8 @@ void KEITEIKEN(int num)
 	}
 	else
 	{
-		cout << "day ne" << endl;
 		for (int i = 0; i < num; i++)
 		{
-
 			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, num);
 		}
 	}
@@ -829,24 +793,23 @@ void removeInAreaOfSukuna(int ID, int num)
 {
 	for (int i = 0; i < heap.size(); i++)
 	{
+
 		if (heap[i]->ID == ID)
 		{
 			if (heap[i]->numOfCusInNode <= num)
 			{
 				/// ddooir no voi thang node cuoi truong heap
 				nodeInHeapOfSukuna *tmp = heap[i];
-				nodeInHeapOfSukuna *del = heap[heap.size() - 1];
-				heap[i] == heap[heap.size() - 1];
-				heap.pop_back();
-				reHeapDown(i);
-				// in ra
 				for (int j = 0; j < tmp->numOfCusInNode; j++)
 				{
 					cout << tmp->customerInNodeOfSukuna[j].result;
 					cout << "-";
 					cout << tmp->ID << endl;
 				}
-				delete del;
+				swap(heap[i], heap[heap.size() - 1]);
+				heap.pop_back();
+				reHeapDown(i);
+				// in ra
 				delete tmp;
 			}
 			else
