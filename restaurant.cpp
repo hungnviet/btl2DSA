@@ -95,6 +95,31 @@ HuffmanNode *checkAndRotate(HuffmanNode *root)
 	}
 	return root;
 }
+HuffmanNode *reBalance(HuffmanNode *root, int &count)
+{
+	if (root == nullptr)
+	{
+		return root;
+	}
+	if (count == 0)
+	{
+		return root;
+	}
+	while (count > 0)
+	{
+		int balance = getHeight(root->left) - getHeight(root->right);
+		if (abs(balance) > 1)
+		{
+			root = checkAndRotate(root);
+			count--;
+		}
+		else
+			break;
+	}
+	root->left = reBalance(root->left, count);
+	root->right = reBalance(root->right, count);
+	return root;
+}
 HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 {
 	int count = 0;
@@ -115,13 +140,13 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		HuffmanNode *internalNode = new HuffmanNode('\0', leftChild->frequency + rightChild->frequency, count);
 		internalNode->left = leftChild;
 		internalNode->right = rightChild;
+		/*
 		internalNode = checkAndRotate(internalNode);
 		internalNode->left = checkAndRotate(internalNode->left);
 		internalNode->right = checkAndRotate(internalNode->right);
-		if (internalNode->frequency == 2 && internalNode->left && internalNode->right)
-		{
-			cout << internalNode->left->data << " " << internalNode->right->data << endl;
-		}
+		*/
+		int countRotate = 3;
+		internalNode = reBalance(internalNode, countRotate);
 		pq.push(internalNode);
 		count++;
 	}
