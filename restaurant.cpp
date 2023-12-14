@@ -390,34 +390,74 @@ struct nodeInHeapOfSukuna
 	vector<Customer> customerInNodeOfSukuna;
 	int ID;
 	int numOfCusInNode;
-	int order;
-	nodeInHeapOfSukuna(int a, int b)
+	nodeInHeapOfSukuna(int a)
 	{
 		ID = a;
-		numOfCusInNode = 0;
-		order = b;
+		numOfCusInNode = 1;
 	}
 };
-int orderOfHeapNode = 0;
 vector<nodeInHeapOfSukuna *> heap;
 vector<int> orderUsedOfArea;
 void reHeapDown(int i)
 {
-	int largest = i;
+	int smallest = i;
 	int left = 2 * i + 1;
 	int right = 2 * i + 2;
-	if (left < heap.size() && heap[left]->numOfCusInNode < heap[largest]->numOfCusInNode)
+	if (left < heap.size() && heap[left]->numOfCusInNode < heap[smallest]->numOfCusInNode)
 	{
-		largest = left;
+		smallest = left;
 	}
-	if (right < heap.size() && heap[right]->numOfCusInNode < heap[largest]->numOfCusInNode)
+	else if (left < heap.size() && heap[left]->numOfCusInNode == heap[smallest]->numOfCusInNode)
 	{
-		largest = right;
+		cout << endl;
+		auto ita = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[left]->ID);
+		auto itb = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[smallest]->ID);
+		int indexa = distance(orderUsedOfArea.begin(), ita);
+		int indexb = distance(orderUsedOfArea.begin(), itb);
+		if (indexa > indexb)
+		{
+			smallest = left;
+		}
 	}
-	if (largest != i)
+	if (right < heap.size() && heap[right]->numOfCusInNode < heap[smallest]->numOfCusInNode)
 	{
-		swap(heap[i], heap[largest]);
-		reHeapDown(largest);
+		smallest = right;
+	}
+	else if (right < heap.size() && heap[right]->numOfCusInNode == heap[smallest]->numOfCusInNode)
+	{
+		auto ita = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[right]->ID);
+		auto itb = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[smallest]->ID);
+		int indexa = distance(orderUsedOfArea.begin(), ita);
+		int indexb = distance(orderUsedOfArea.begin(), itb);
+		if (indexa > indexb)
+		{
+			smallest = right;
+		}
+	}
+	if (smallest != i)
+	{
+		swap(heap[i], heap[smallest]);
+		reHeapDown(smallest);
+	}
+}
+void reheapUp(int i)
+{
+	if (i > 0 && heap[(i - 1) / 2]->numOfCusInNode > heap[i]->numOfCusInNode)
+	{
+		swap(heap[i], heap[(i - 1) / 2]);
+		reheapUp((i - 1) / 2);
+	}
+	else if (i > 0 && heap[(i - 1) / 2]->numOfCusInNode == heap[i]->numOfCusInNode)
+	{
+		auto ita = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[i]->ID);
+		auto itb = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[(i - 1) / 2]->ID);
+		int indexa = distance(orderUsedOfArea.begin(), ita); /// thang dang xet
+		int indexb = distance(orderUsedOfArea.begin(), itb); /// thang cha
+		if (indexa > indexb)
+		{
+			swap(heap[i], heap[(i - 1) / 2]);
+			reheapUp((i - 1) / 2);
+		}
 	}
 }
 bool checkNodeExist(int ID)
@@ -437,16 +477,12 @@ bool checkNodeExist(int ID)
 }
 void addNodeToHeap(int ID)
 {
-
-	nodeInHeapOfSukuna *tmp = new nodeInHeapOfSukuna(ID, orderOfHeapNode + 1);
+	nodeInHeapOfSukuna *tmp = new nodeInHeapOfSukuna(ID);
 	heap.push_back(tmp);
+
 	// reheap up
 	int i = heap.size() - 1;
-	while (i != 0 && heap[(i - 1) / 2]->numOfCusInNode > heap[i]->numOfCusInNode)
-	{
-		swap(heap[(i - 1) / 2], heap[i]);
-		i = (i - 1) / 2;
-	}
+	reheapUp(i);
 }
 void addCustomer(string name, int result)
 {
@@ -465,7 +501,6 @@ void addCustomer(string name, int result)
 	{
 		orderUsedOfArea.insert(orderUsedOfArea.begin(), id);
 	}
-
 	/// add customer or node in restaurent
 	if (checkNodeExist(id))
 	{
@@ -489,7 +524,6 @@ void addCustomer(string name, int result)
 			if (heap[i]->ID == id)
 			{
 				heap[i]->customerInNodeOfSukuna.push_back(tmpCus);
-				heap[i]->numOfCusInNode++;
 				reHeapDown(i);
 				break;
 			}
@@ -849,6 +883,7 @@ void removeInAreaOfSukuna(int ID, int num)
 				swap(heap[i], heap[heap.size() - 1]);
 				heap.pop_back();
 				reHeapDown(i);
+				///
 				// in ra
 				delete tmp;
 			}
@@ -864,11 +899,7 @@ void removeInAreaOfSukuna(int ID, int num)
 				}
 				/// reheap up
 				int j = i;
-				while (j != 0 && heap[(j - 1) / 2]->numOfCusInNode > heap[j]->numOfCusInNode)
-				{
-					swap(heap[(j - 1) / 2], heap[j]);
-					j = (j - 1) / 2;
-				}
+				reheapUp(j);
 			}
 			auto it = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), ID);
 			if (it != orderUsedOfArea.end())
