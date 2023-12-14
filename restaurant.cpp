@@ -79,16 +79,16 @@ HuffmanNode *checkAndRotate(HuffmanNode *root)
 	{
 		return rotateRight(root);
 	}
-	if (balance > 1 && getHeight(root->left->left) < getHeight(root->left->right))
+	if (balance > 1 && getHeight(root->left->left) - getHeight(root->left->right) < 0)
 	{
 		root->left = rotateLeft(root->left);
 		return rotateRight(root);
 	}
-	if (balance < -1 && getHeight(root->right->right) >= getHeight(root->right->left))
+	if (balance < -1 && getHeight(root->right->left) - getHeight(root->right->right) <= 0)
 	{
 		return rotateLeft(root);
 	}
-	if (balance < -1 && getHeight(root->right->left) > getHeight(root->right->right))
+	if (balance < -1 && getHeight(root->right->left) - getHeight(root->right->right) > 0)
 	{
 		root->right = rotateRight(root->right);
 		return rotateLeft(root);
@@ -140,13 +140,9 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		HuffmanNode *internalNode = new HuffmanNode('\0', leftChild->frequency + rightChild->frequency, count);
 		internalNode->left = leftChild;
 		internalNode->right = rightChild;
-		/*
-		internalNode = checkAndRotate(internalNode);
-		internalNode->left = checkAndRotate(internalNode->left);
-		internalNode->right = checkAndRotate(internalNode->right);
-		*/
 		int countRotate = 3;
 		internalNode = reBalance(internalNode, countRotate);
+		internalNode->order = count;
 		pq.push(internalNode);
 		count++;
 	}
@@ -662,6 +658,16 @@ int counthoanvi(vector<int> &arr)
 void removeInAreaOfGoJo(int ID, int Y);
 void Kokusen()
 {
+	cout << "Truoc xoa " << endl;
+	for (int i = 0; i < MAXSIZE; i++)
+	{
+		cout << "GOJO label " << i + 1 << endl;
+		for (int j = 0; j < hashTableOfGoJo[i].numOfCusInArea; j++)
+		{
+			cout << hashTableOfGoJo[i].orderInputOfCustomer[j].result << " ";
+		}
+		cout << endl;
+	}
 	for (int i = 0; i < MAXSIZE; i++)
 	{
 		if (hashTableOfGoJo[i].root)
@@ -675,6 +681,16 @@ void Kokusen()
 			int Y = counthoanvi(arr);
 			removeInAreaOfGoJo(i + 1, Y);
 		}
+	}
+	cout << "sau xoa" << endl;
+	for (int i = 0; i < MAXSIZE; i++)
+	{
+		cout << "GOJO label " << i + 1 << endl;
+		for (int j = 0; j < hashTableOfGoJo[i].numOfCusInArea; j++)
+		{
+			cout << hashTableOfGoJo[i].orderInputOfCustomer[j].result << " ";
+		}
+		cout << endl;
 	}
 }
 nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
@@ -792,10 +808,10 @@ void KEITEIKEN(int num)
 		OrderOfNumCustomer.push_back(areaAndNum(heap[i]->ID, heap[i]->numOfCusInNode));
 	}
 	sort(OrderOfNumCustomer.begin(), OrderOfNumCustomer.end(), compareNumOfCustomer);
-
 	if (num >= heap.size())
 	{
-		for (int i = 0; i < heap.size(); i++)
+		int n = heap.size();
+		for (int i = 0; i < n; i++)
 		{
 			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
 		}
@@ -818,7 +834,6 @@ void removeInAreaOfSukuna(int ID, int num)
 {
 	for (int i = 0; i < heap.size(); i++)
 	{
-
 		if (heap[i]->ID == ID)
 		{
 			if (heap[i]->numOfCusInNode <= num)
@@ -854,6 +869,17 @@ void removeInAreaOfSukuna(int ID, int num)
 					swap(heap[(j - 1) / 2], heap[j]);
 					j = (j - 1) / 2;
 				}
+			}
+			auto it = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), ID);
+			if (it != orderUsedOfArea.end())
+			{
+				int index = distance(orderUsedOfArea.begin(), it);
+				orderUsedOfArea.erase(orderUsedOfArea.begin() + index);
+				orderUsedOfArea.insert(orderUsedOfArea.begin(), ID);
+			}
+			else
+			{
+				orderUsedOfArea.insert(orderUsedOfArea.begin(), ID);
 			}
 		}
 	}
