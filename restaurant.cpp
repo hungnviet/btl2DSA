@@ -10,9 +10,8 @@ struct HuffmanNode
 	int order;
 	HuffmanNode *left;
 	HuffmanNode *right;
-
 	// Constructor
-	HuffmanNode(char d, int freq, int count) : data(d), frequency(freq), left(nullptr), right(nullptr), order(count) {}
+	HuffmanNode(char d, int freq, int count) : data(d), frequency(freq), order(count), left(nullptr), right(nullptr) {}
 };
 HuffmanNode *rotateRight(HuffmanNode *root)
 {
@@ -130,6 +129,7 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		pq.push(node);
 	}
 	count++;
+	bool check = true;
 	while (pq.size() > 1)
 	{
 
@@ -143,8 +143,16 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		int countRotate = 3;
 		internalNode = reBalance(internalNode, countRotate);
 		internalNode->order = count;
+		if (internalNode->data != '\0')
+		{
+			check = false;
+		}
 		pq.push(internalNode);
 		count++;
+	}
+	if (check == false)
+	{
+		return nullptr;
 	}
 	return pq.top();
 }
@@ -182,6 +190,7 @@ bool compare(pair<char, int> &a, pair<char, int> &b)
 			return islower(a.first);
 		}
 	}
+	return true;
 }
 vector<pair<char, int>> createFrequencyTable(string inputString)
 {
@@ -272,6 +281,10 @@ int getRes(string name)
 		caesarName.push_back(c);
 	}
 	HuffmanNode *huffmanTreeRoot = buildHuffmanTree(Res);
+	if (huffmanTreeRoot == nullptr)
+	{
+		return -1;
+	}
 	HuffmanNode *a = rootOfLatestCustomer;
 	rootOfLatestCustomer = huffmanTreeRoot;
 	delHulfmanTree(a);
@@ -282,7 +295,6 @@ int getRes(string name)
 	{
 		str += huffmanCode[ch];
 	}
-	int result;
 	string t = "";
 	if (str.size() <= 10)
 	{
@@ -293,7 +305,7 @@ int getRes(string name)
 	}
 	else
 	{
-		for (int i = str.size() - 1; i > str.size() - 11; i--)
+		for (int i = int(str.size()) - 1; i > int(str.size()) - 11; i--)
 		{
 			t += str[i];
 		}
@@ -320,9 +332,9 @@ struct Customer
 /// Build GOJO restaurent
 struct nodeInAreaOfGoJo
 {
-	Customer cus;
 	nodeInAreaOfGoJo *left;
 	nodeInAreaOfGoJo *right;
+	Customer cus;
 	nodeInAreaOfGoJo() : left(nullptr), right(nullptr), cus(Customer()) {}
 	nodeInAreaOfGoJo(string name, int res) : left(nullptr), right(nullptr), cus(name, res) {}
 };
@@ -403,11 +415,11 @@ void reHeapDown(int i)
 	int smallest = i;
 	int left = 2 * i + 1;
 	int right = 2 * i + 2;
-	if (left < heap.size() && heap[left]->numOfCusInNode < heap[smallest]->numOfCusInNode)
+	if (left < int(heap.size()) && heap[left]->numOfCusInNode < heap[smallest]->numOfCusInNode)
 	{
 		smallest = left;
 	}
-	else if (left < heap.size() && heap[left]->numOfCusInNode == heap[smallest]->numOfCusInNode)
+	else if (left < int(heap.size()) && heap[left]->numOfCusInNode == heap[smallest]->numOfCusInNode)
 	{
 		auto ita = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[left]->ID);
 		auto itb = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[smallest]->ID);
@@ -418,11 +430,11 @@ void reHeapDown(int i)
 			smallest = left;
 		}
 	}
-	if (right < heap.size() && heap[right]->numOfCusInNode < heap[smallest]->numOfCusInNode)
+	if (right < int(heap.size()) && heap[right]->numOfCusInNode < heap[smallest]->numOfCusInNode)
 	{
 		smallest = right;
 	}
-	else if (right < heap.size() && heap[right]->numOfCusInNode == heap[smallest]->numOfCusInNode)
+	else if (right < int(heap.size()) && heap[right]->numOfCusInNode == heap[smallest]->numOfCusInNode)
 	{
 		auto ita = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[right]->ID);
 		auto itb = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[smallest]->ID);
@@ -465,7 +477,7 @@ bool checkNodeExist(int ID)
 	{
 		return false;
 	}
-	for (int i = 0; i < heap.size(); i++)
+	for (int i = 0; i < int(heap.size()); i++)
 	{
 		if (heap[i]->ID == ID)
 		{
@@ -503,7 +515,7 @@ void addCustomer(string name, int result)
 	/// add customer or node in restaurent
 	if (checkNodeExist(id))
 	{
-		for (int i = 0; i < heap.size(); i++)
+		for (int i = 0; i < int(heap.size()); i++)
 		{
 			if (heap[i]->ID == id)
 			{
@@ -517,7 +529,7 @@ void addCustomer(string name, int result)
 	else
 	{
 		addNodeToHeap(id);
-		for (int i = 0; i < heap.size(); i++)
+		for (int i = 0; i < int(heap.size()); i++)
 		{
 			if (heap[i]->ID == id)
 			{
@@ -533,7 +545,7 @@ void addCustomer(string name, int result)
 bool checkName(string name)
 {
 	set<char> s;
-	for (int i = 0; i < name.length(); i++)
+	for (int i = 0; i < int(name.length()); i++)
 	{
 		s.insert(name[i]);
 	}
@@ -551,21 +563,18 @@ void LAPSE(string name)
 	}
 
 	int result = getRes(name);
-	int id = result % MAXSIZE + 1;
-	cout << "result: ";
-	cout << result;
-	cout << " ";
-	cout << "ID: ";
-	cout << id << endl;
-	Customer tmpCus(name, result);
-	if (result % 2 == 0)
+	if (result != -1)
 	{
-		addCustomer(name, result);
-	}
-	else
-	{
-		int ID = result % MAXSIZE + 1;
-		hashTableOfGoJo[ID - 1].addCusToAreaOfRoJo(name, result);
+		Customer tmpCus(name, result);
+		if (result % 2 == 0)
+		{
+			addCustomer(name, result);
+		}
+		else
+		{
+			int ID = result % MAXSIZE + 1;
+			hashTableOfGoJo[ID - 1].addCusToAreaOfRoJo(name, result);
+		}
 	}
 }
 
@@ -605,7 +614,7 @@ void CLEAVE(int num)
 }
 void subCleave(int index, int num)
 {
-	if (index < heap.size())
+	if (index < int(heap.size()))
 	{
 		printEachAreaOfSukuna(heap[index], num);
 		subCleave(2 * index + 1, num);
@@ -681,16 +690,7 @@ int numOfWays(vector<int> &nums)
 void removeInAreaOfGoJo(int ID, int Y);
 void Kokusen()
 {
-	cout << "Truoc xoa " << endl;
-	for (int i = 0; i < MAXSIZE; i++)
-	{
-		cout << "GOJO label " << i + 1 << endl;
-		for (int j = 0; j < hashTableOfGoJo[i].numOfCusInArea; j++)
-		{
-			cout << hashTableOfGoJo[i].orderInputOfCustomer[j].result << " ";
-		}
-		cout << endl;
-	}
+
 	for (int i = 0; i < MAXSIZE; i++)
 	{
 		if (hashTableOfGoJo[i].root)
@@ -699,16 +699,6 @@ void Kokusen()
 			int Y = numOfWays(arr);
 			removeInAreaOfGoJo(i + 1, Y);
 		}
-	}
-	cout << "sau xoa" << endl;
-	for (int i = 0; i < MAXSIZE; i++)
-	{
-		cout << "GOJO label " << i + 1 << endl;
-		for (int j = 0; j < hashTableOfGoJo[i].numOfCusInArea; j++)
-		{
-			cout << hashTableOfGoJo[i].orderInputOfCustomer[j].result << " ";
-		}
-		cout << endl;
 	}
 }
 nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
@@ -743,7 +733,6 @@ nodeInAreaOfGoJo *delNode(nodeInAreaOfGoJo *root, Customer tmp)
 	{
 
 		nodeInAreaOfGoJo *succParent = root;
-
 		// Find successor
 		nodeInAreaOfGoJo *succ = root->right;
 		while (succ->left != NULL)
@@ -821,12 +810,12 @@ bool compareNumOfCustomer(areaAndNum a, areaAndNum b)
 void KEITEIKEN(int num)
 {
 	vector<areaAndNum> OrderOfNumCustomer;
-	for (int i = 0; i < heap.size(); i++)
+	for (int i = 0; i < int(heap.size()); i++)
 	{
 		OrderOfNumCustomer.push_back(areaAndNum(heap[i]->ID, heap[i]->numOfCusInNode));
 	}
 	sort(OrderOfNumCustomer.begin(), OrderOfNumCustomer.end(), compareNumOfCustomer);
-	if (num >= heap.size())
+	if (num >= int(heap.size()))
 	{
 		int n = heap.size();
 		for (int i = 0; i < n; i++)
@@ -850,7 +839,7 @@ void KEITEIKEN(int num)
 }
 void removeInAreaOfSukuna(int ID, int num)
 {
-	for (int i = 0; i < heap.size(); i++)
+	for (int i = 0; i < int(heap.size()); i++)
 	{
 		if (heap[i]->ID == ID)
 		{
@@ -933,49 +922,36 @@ void simulate(string filename)
 		{
 			ss >> maxsize;
 			MAXSIZE = stoi(maxsize);
-			cout << "MAXSIZE: ";
-			cout << MAXSIZE << endl;
 		}
 		else if (str == "LAPSE")
 		{
 			ss >> name;
-			cout << "LAPSE";
-			cout << " ";
-			cout << name << endl;
 			LAPSE(name);
 		}
 		else if (str == "HAND")
 		{
-			cout << "HAND" << endl;
 			HAND();
 		}
 		else if (str == "LIMITLESS")
 		{
 			ss >> num;
 			int n = stoi(num);
-			cout << "LIMITLESS ";
-			cout << n << endl;
 			LIMITLESS(n);
 		}
 		else if (str == "CLEAVE")
 		{
 			ss >> num;
 			int n = stoi(num);
-			cout << "CLEAVE ";
-			cout << n << endl;
 			CLEAVE(n);
 		}
 		else if (str == "KEITEIKEN")
 		{
 			ss >> num;
 			int n = stoi(num);
-			cout << "KEITEIKEN ";
-			cout << n << endl;
 			KEITEIKEN(n);
 		}
 		else if (str == "KOKUSEN")
 		{
-			cout << "KOKUSEN" << endl;
 			Kokusen();
 		}
 	}
