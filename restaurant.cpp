@@ -409,7 +409,6 @@ void reHeapDown(int i)
 	}
 	else if (left < heap.size() && heap[left]->numOfCusInNode == heap[smallest]->numOfCusInNode)
 	{
-		cout << endl;
 		auto ita = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[left]->ID);
 		auto itb = find(orderUsedOfArea.begin(), orderUsedOfArea.end(), heap[smallest]->ID);
 		int indexa = distance(orderUsedOfArea.begin(), ita);
@@ -508,7 +507,6 @@ void addCustomer(string name, int result)
 		{
 			if (heap[i]->ID == id)
 			{
-				cout << id << endl;
 				heap[i]->customerInNodeOfSukuna.push_back(tmpCus);
 				heap[i]->numOfCusInNode++;
 				reHeapDown(i);
@@ -632,62 +630,53 @@ void printEachAreaOfSukuna(nodeInHeapOfSukuna *node, int num)
 }
 
 /// KOKUSEN FUNCTION TO KICK THE GUESS IN GOJO restaurant
-void subConvertToPost(vector<int> &res, nodeInAreaOfGoJo *root);
-vector<int> arrayAfterConvertToPost(nodeInAreaOfGoJo *root)
-{
-	vector<int> res;
-	subConvertToPost(res, root);
-	return res;
-}
-void subConvertToPost(vector<int> &res, nodeInAreaOfGoJo *root)
+void subConvertToPre(vector<int> &res, nodeInAreaOfGoJo *root)
 {
 	if (root)
 	{
-		subConvertToPost(res, root->left);
-		subConvertToPost(res, root->right);
 		res.push_back(root->cus.result);
+		subConvertToPre(res, root->left);
+		subConvertToPre(res, root->right);
 	}
 }
-void factorial(int fact[], int n)
+vector<int> arrayAfterConvertToPre(nodeInAreaOfGoJo *root)
 {
-	fact[0] = 1;
-	for (int i = 1; i <= n; i++)
-	{
-		fact[i] = fact[i - 1] * i;
-	}
+	vector<int> res;
+	subConvertToPre(res, root);
+	return res;
 }
-int nCr(int n, int r)
+int numOfWays(vector<int> &nums)
 {
-	int fact[n + 1];
-	factorial(fact, n);
-	return fact[n] / (fact[r] * fact[n - r]);
-}
-int counthoanvi(vector<int> &arr)
-{
-	int n = arr.size();
-	if (n <= 2)
+	int n = nums.size();
+	vector<vector<int>> comb(n + 1, vector<int>(n + 1));
+	comb[0][0] = 1;
+	for (int i = 1; i <= n; ++i)
 	{
-		return 1;
-	}
-	vector<int> left;
-	vector<int> right;
-	int root = arr[0];
-	for (int i = 0; i < n; i++)
-	{
-		if (arr[i] < root)
+		comb[i][0] = 1;
+		for (int j = 1; j <= i; ++j)
 		{
-			left.push_back(arr[i]);
-		}
-		else if (arr[i] > root)
-		{
-			right.push_back(arr[i]);
+			comb[i][j] = (comb[i - 1][j - 1] + comb[i - 1][j]) % MAXSIZE;
 		}
 	}
-	int nleft = left.size();
-	int nright = right.size();
-	int countleft = counthoanvi(left);
-	int countright = counthoanvi(right);
-	return nCr(n - 1, nleft) * countleft * countright;
+	function<int(vector<int> &)> dfs = [&](vector<int> &nums)
+	{
+		int n = nums.size();
+		if (n <= 2)
+			return 1;
+		vector<int> left, right;
+		for (int i = 1; i < n; ++i)
+		{
+			if (nums[i] < nums[0])
+				left.push_back(nums[i]);
+			else
+				right.push_back(nums[i]);
+		}
+		long long res = comb[n - 1][left.size()];
+		res = res * dfs(left) % MAXSIZE;
+		res = res * dfs(right) % MAXSIZE;
+		return (int)res;
+	};
+	return dfs(nums);
 }
 void removeInAreaOfGoJo(int ID, int Y);
 void Kokusen()
@@ -706,13 +695,8 @@ void Kokusen()
 	{
 		if (hashTableOfGoJo[i].root)
 		{
-			vector<int> arr = arrayAfterConvertToPost(hashTableOfGoJo[i].root);
-			int rootforhvi = arr.back();
-			arr.pop_back();
-			arr.push_back(arr.front());
-			arr.insert(arr.begin(), rootforhvi);
-			int fact[arr.size()];
-			int Y = counthoanvi(arr);
+			vector<int> arr = arrayAfterConvertToPre(hashTableOfGoJo[i].root);
+			int Y = numOfWays(arr);
 			removeInAreaOfGoJo(i + 1, Y);
 		}
 	}
@@ -891,9 +875,9 @@ void removeInAreaOfSukuna(int ID, int num)
 			{
 				for (int j = 0; j < num; j++)
 				{
-					cout << heap[i]->customerInNodeOfSukuna[0].name;
+					cout << heap[i]->customerInNodeOfSukuna[0].result;
 					cout << "-";
-					cout << heap[i]->ID;
+					cout << heap[i]->ID << endl;
 					heap[i]->numOfCusInNode--;
 					heap[i]->customerInNodeOfSukuna.erase(heap[i]->customerInNodeOfSukuna.begin(), heap[i]->customerInNodeOfSukuna.begin() + 1);
 				}
