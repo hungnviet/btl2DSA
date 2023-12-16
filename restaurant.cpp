@@ -94,13 +94,13 @@ HuffmanNode *checkAndRotate(HuffmanNode *root)
 	}
 	return root;
 }
-HuffmanNode *reBalance(HuffmanNode *root, int &count)
+HuffmanNode *reBalance(HuffmanNode *root, int &count, bool &check)
 {
 	if (root == nullptr)
 	{
 		return root;
 	}
-	if (count == 0)
+	if (count == 0 || check)
 	{
 		return root;
 	}
@@ -111,14 +111,34 @@ HuffmanNode *reBalance(HuffmanNode *root, int &count)
 		{
 			root = checkAndRotate(root);
 			count--;
+			check = true;
+			return root;
 		}
 		else
 			break;
 	}
-	root->left = reBalance(root->left, count);
-	root->right = reBalance(root->right, count);
+	root->left = reBalance(root->left, count, check);
+	root->right = reBalance(root->right, count, check);
 	return root;
 }
+HuffmanNode *turn_back_root(HuffmanNode *root, int &count)
+{
+	bool check = false;
+	while (true)
+	{
+		root = reBalance(root, count, check);
+		if (count == 0 || check == false)
+		{
+			break;
+		}
+		else
+		{
+			check = false;
+		}
+	}
+	return root;
+}
+
 HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 {
 	int count = 0;
@@ -141,7 +161,7 @@ HuffmanNode *buildHuffmanTree(const vector<pair<char, int>> &frequencyTable)
 		internalNode->left = leftChild;
 		internalNode->right = rightChild;
 		int countRotate = 3;
-		internalNode = reBalance(internalNode, countRotate);
+		internalNode = turn_back_root(internalNode, countRotate);
 		internalNode->order = count;
 		if (internalNode->data != '\0')
 		{
@@ -690,7 +710,6 @@ int numOfWays(vector<int> &nums)
 void removeInAreaOfGoJo(int ID, int Y);
 void Kokusen()
 {
-
 	for (int i = 0; i < MAXSIZE; i++)
 	{
 		if (hashTableOfGoJo[i].root)
@@ -817,16 +836,11 @@ void KEITEIKEN(int num)
 	sort(OrderOfNumCustomer.begin(), OrderOfNumCustomer.end(), compareNumOfCustomer);
 	if (num >= int(heap.size()))
 	{
+
 		int n = heap.size();
 		for (int i = 0; i < n; i++)
 		{
-			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, OrderOfNumCustomer[i].num);
-		}
-		while (heap.size() > 0)
-		{
-			nodeInHeapOfSukuna *tmp = heap[heap.size() - 1];
-			heap.pop_back();
-			delete tmp;
+			removeInAreaOfSukuna(OrderOfNumCustomer[i].id, num);
 		}
 	}
 	else
